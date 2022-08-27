@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Control Panel</title>
+        <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/eventemitter2@5.0.1/lib/eventemitter2.min.js"></script>
+        <script type="text/javascript" src="https://static.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+
+        <style>
+          .switch {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 34px;
+          }
+          
+          .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+          }
+          
+          .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(221, 10, 10, 0.774);
+            -webkit-transition: .4s;
+            transition: .4s;
+          }
+          
+          .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+          }
+          
+          .slider:after{
+          content:'LOCKED';
+          color: white;
+          display: block;
+          position: absolute;
+          transform: translate(-50%,-50%);
+          top: 50%;
+          left: 50%;
+          font-size: 10px;
+          font-family: Verdana, sans-serif;
+          }
+
+          input:checked + .slider {
+            background-color: #198b19ec;
+          }
+          
+          input:focus + .slider {
+            box-shadow: 0 0 1px #0a8a1b;
+          }
+          
+          input:checked + .slider:before {
+            -webkit-transform: translateX(85px);
+            -ms-transform: translateX(85px);
+            transform: translateX(85px);
+          }
+
+          input:checked + .slider:after{  
+            content:'UNLOCKED';
+          }
+
+          /* Rounded sliders */
+          .slider.round {
+            border-radius: 68px;
+          }
+          
+          .slider.round:before {
+            border-radius: 50%;
+          }
+
+          .container {
+                background-size: cover;
+                background: rgb(226,226,226); /* Old browsers */
+                background: -moz-linear-gradient(top,  rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
+                background: -webkit-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
+                background: -o-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
+                background: -ms-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
+                background: linear-gradient(to bottom,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+                padding: 20px;
+              }
+
+              .led-box {
+                height: 30px;
+                width: 25%;
+                margin: 10px 0;
+                float: left;
+              }
+
+              .led-box p {
+                font-size: 12px;
+                text-align: center;
+                margin: 1em;
+              }
+
+              .led-red {
+                margin: 0 auto;
+                width: 24px;
+                height: 24px;
+                background-color: #F00;
+                border-radius: 50%;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px;
+                -webkit-animation: blinkRed 0.5s infinite;
+                -moz-animation: blinkRed 0.5s infinite;
+                -ms-animation: blinkRed 0.5s infinite;
+                -o-animation: blinkRed 0.5s infinite;
+                animation: blinkRed 0.5s infinite;
+              }
+
+              @-webkit-keyframes blinkRed {
+                  from { background-color: #F00; }
+                  50% { background-color: #A00; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0;}
+                  to { background-color: #F00; }
+              }
+              @-moz-keyframes blinkRed {
+                  from { background-color: #F00; }
+                  50% { background-color: #A00; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0;}
+                  to { background-color: #F00; }
+              }
+              @-ms-keyframes blinkRed {
+                  from { background-color: #F00; }
+                  50% { background-color: #A00; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0;}
+                  to { background-color: #F00; }
+              }
+              @-o-keyframes blinkRed {
+                  from { background-color: #F00; }
+                  50% { background-color: #A00; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0;}
+                  to { background-color: #F00; }
+              }
+              @keyframes blinkRed {
+                  from { background-color: #F00; }
+                  50% { background-color: #A00; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0;}
+                  to { background-color: #F00; }
+              }
+
+              .led-yellow {
+                margin: 0 auto;
+                width: 24px;
+                height: 24px;
+                background-color: #FF0;
+                border-radius: 50%;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 12px;
+                -webkit-animation: blinkYellow 1s infinite;
+                -moz-animation: blinkYellow 1s infinite;
+                -ms-animation: blinkYellow 1s infinite;
+                -o-animation: blinkYellow 1s infinite;
+                animation: blinkYellow 1s infinite;
+              }
+
+              @-webkit-keyframes blinkYellow {
+                  from { background-color: #FF0; }
+                  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+                  to { background-color: #FF0; }
+              }
+              @-moz-keyframes blinkYellow {
+                  from { background-color: #FF0; }
+                  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+                  to { background-color: #FF0; }
+              }
+              @-ms-keyframes blinkYellow {
+                  from { background-color: #FF0; }
+                  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+                  to { background-color: #FF0; }
+              }
+              @-o-keyframes blinkYellow {
+                  from { background-color: #FF0; }
+                  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+                  to { background-color: #FF0; }
+              }
+              @keyframes blinkYellow {
+                  from { background-color: #FF0; }
+                  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+                  to { background-color: #FF0; }
+              }
+
+              .led-green {
+                margin: 0 auto;
+                width: 24px;
+                height: 24px;
+                background-color: #ABFF00;
+                border-radius: 50%;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+              }
+
+              .led-blue {
+                margin: 0 auto;
+                width: 24px;
+                height: 24px;
+                background-color: #24E0FF;
+                border-radius: 50%;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #006 0 -1px 9px, #3F8CFF 0 2px 14px;
+              }
+          </style>
+    </head>
+
+    <body>
+      <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-secondary text-white">
+            <a class="navbar-brand" href="#">NCRL</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                  <li class="nav-item active">
+                    <a class="nav-link" href="http://127.0.0.1:5000/">Home<span class="sr-only">(current)</span></a>
+              </div>
+        </nav>
+      </div>
+      <div style="padding-top:55px; margin-bottom:20px; padding-bottom:35px;" class="jumbotron jumbotron-fluid bg-info text-white">
+          <h1 style="padding-bottom:20px;" class="text-center display-3"> NCRL Apriltag Localization </h1>
+          <p class="text-center display-8">This is a web control interface for NCRL Apriltag Localization Project.</p>
+      </div>
+      <div id="control_gui" class="container-fluid">
+        <div class="row" style="margin-left:1rem;">
+          <div class="col-2 jumbotron" style="padding-bottom:2rem; padding-top:1rem; padding-right:1rem; padding-left:1rem; margin-right:1rem;">
+            <h3>Connection status</h3>
+            <p class="text-muted" v-if="!connected && !failure">Not Connected</p>
+            <p class="text-danger" v-if="failure">Error</p>
+            <p class="text-success" v-if="connected">Connected</p>
+            <label for="uav_server">UAV_port: </label><br/>
+            <input id="uav_server" type="text" v-model="uav_port"/><br/>
+            <label for="uav_ip">UAV_ip: </label><br/>
+            <input id="uav_ip" type="text" v-model="uav_ip"/><br/>
+            <button class="btn btn-danger"  style="margin-top:10px; margin-bottom:10px;" @click="disconnect" v-if="connected">Disconnect</button>
+            <button class="btn btn-success" style="margin-top:10px; margin-bottom:10px;" @click="connect" v-if="!connected">Connect</button>
+          </div>
+
+          <div class="col-9 jumbotron" style="padding-bottom:2rem; padding-top:1rem; padding-left:1rem;">
+            <div class="row">
+              <div class="col-8">
+                <h3 style="margin-bottom:1rem;">Control Panel
+                  <label class="switch">
+                    <input id="unlock" type="checkbox" v-model="unlocked" @change="unlock">
+                    <span class="slider round"></span>
+                  </label>
+                </h3>
+              </div>
+              <div class="col-4 text-right">
+                <div class="led-green" id="indicator"></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-4">
+                <div class="row" style="margin-bottom:2rem;">
+                  <div class="col-6 text-center" style="margin-top:2rem;">
+                    <button type="button" class="btn btn-lg btn-primary" style="margin-bottom:1rem;" id="btn_take_off" @click="takeoff">Take Off</button><br/>
+                    <button type="button" class="btn btn-lg btn-primary" style="margin-top:1rem;" id="btn_land" @click="landing">Land</button>
+                  </div>
+
+                  <div class="col-6 text-center" style="margin-top:2rem;">
+                    <button type="button" class="btn btn-lg btn-primary" style="margin-bottom:1rem;" id="btn_return" @click="returning">Return</button><br/>
+                    <button type="button" class="btn btn-lg btn-danger" style="margin-top:1rem;" id="btn_kill" >Kill</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-2">
+                <label>Cruise Height:</label><br/>
+                <input type="number" step="0.01" min="0" v-model="cruise_height"></input><br/>
+                <label>Turning direction:</label><br/>
+                <button class="btn btn-info" id="left_btn" @click="chooseDirection('left')">left</button>
+                <button class="btn btn-info" id="right_btn" @click="chooseDirection('right')">right</button><br/>
+                <label>Hovering Time(s):</label><br/>
+                <input type="number" min="0" v-model="hover_time"></input><br/>
+              </div>
+
+              <div class="col-6 text-center">
+                <h4>Select Destination</h4>
+                <input type="text" style="margin-top:1rem;" id="dest" v-model="destination"/><br/>
+                <button class="btn btn-success btn-lg" style="margin-top:2rem;" id="btn_start" disabled @click="startFlight"> Start </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row" style="margin-left:1rem;">
+          <div class="col-2" style="overflow:auto; margin-right:1rem; max-height: 40rem;">
+            <h3>Log Message</h3>
+            <div>
+                <p v-for="log of logs">{{log}}</p>
+            </div>
+          </div>
+          <div class="col-9 jumbotron" style="padding-bottom:2rem; padding-top:1rem; padding-right:2rem; padding-left:1rem; ">     
+            <div class="row">
+              <div class="col-8">
+                <h3>Monitor Screen</h3>
+                <div class="card" style="width: 685px; height: 565px;">
+                  <div class="card-body">
+                    <p id="cam_topic"><p>
+                    <div id="mjpeg"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-4">
+                <h3>UAV Status</h3>
+                <label type="text">ID: </label> <a id="uav_id"></a> <br/>
+                <label type="text">Battery: </label> <a id="uav_battery"> </a> <br/>
+                <label type="text">Status: </label> <a id="uav_status"></a> <br/>
+                <label type="text">Location: </label> <a id="uav_location"> </a> <br/>
+                <label type="text">Take Off Time: </label> <a id="uav_takeOff_time"> </a> <br/>
+                <label type="text">Cruise Height: </label> <a id="uav_height"> </a> <br/>
+                <label type="text">Hovering Delay: </label> <a id="uav_delay"> </a> <br/>
+                <label type="text">Obstacle Detection Distance: </label> <a id="ob_dist"> </a> <br/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script type="text/javascript" src="main.js"></script>
+        
+    </body>
+</html>

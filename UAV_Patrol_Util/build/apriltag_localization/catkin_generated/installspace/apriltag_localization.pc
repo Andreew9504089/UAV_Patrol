@@ -1,0 +1,8 @@
+prefix=/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/install
+
+Name: apriltag_localization
+Description: Description of apriltag_localization
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

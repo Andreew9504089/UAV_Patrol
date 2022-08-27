@@ -1,0 +1,8 @@
+prefix=/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/install
+
+Name: auto_flight
+Description: Description of auto_flight
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lauto_flight
+Requires: roscpp rospy std_msgs message_runtime
