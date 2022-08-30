@@ -29,7 +29,7 @@ class formatConverter():
             self.forward_tags_id.append(dct['parent'])
             self.forward_tags_id.extend(dct['child'])
 
-        self.tags = self.tag_data['bodies'][0]['test_room']['tags']
+        self.tags = self.tag_data['bodies'][0]['Env']['tags']
 
     def writeYaml(self):
         with open(self.outputPath, 'w') as f:

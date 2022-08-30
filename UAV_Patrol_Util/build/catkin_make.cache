@@ -1,2 +1,2 @@
-apriltag_ros/apriltag_ros:auto_flight:robot_gui_bridge:yaml_util/yaml_service
+apriltag_ros/apriltag_ros:auto_flight:path_planner:robot_gui_bridge:yaml_util/yaml_service
 -DCATKIN_DEVEL_PREFIX=/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/devel -DCMAKE_INSTALL_PREFIX=/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/install -G Unix Makefiles

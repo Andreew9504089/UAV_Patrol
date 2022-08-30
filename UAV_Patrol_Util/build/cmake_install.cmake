@@ -131,6 +131,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/build/gtest/cmake_install.cmake")
+  include("/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/build/path_planner/cmake_install.cmake")
   include("/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/build/robot_gui_bridge/cmake_install.cmake")
   include("/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/build/apriltag_ros/apriltag_ros/cmake_install.cmake")
   include("/home/andrew/NCRL/UAV_Patrol/UAV_Patrol_Util/build/yaml_util/yaml_service/cmake_install.cmake")

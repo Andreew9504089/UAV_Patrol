@@ -5,6 +5,7 @@
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("gtest")
+subdirs("path_planner")
 subdirs("robot_gui_bridge")
 subdirs("apriltag_ros/apriltag_ros")
 subdirs("yaml_util/yaml_service")

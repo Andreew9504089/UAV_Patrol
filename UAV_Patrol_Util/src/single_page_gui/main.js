@@ -13,11 +13,14 @@ var app = new Vue({
         cruise_height: 1,
         hover_time: 15,
         unlocked: false,
+        camera_list: [],
+        camera_topic: '',
     },
     methods: {
         connect: function(){
             console.log('Connecting...')
 
+            document.getElementById("mjpeg").style.display = "block";
             this.ros = new ROSLIB.Ros({
                 url: 'ws://' + this.uav_ip + ':' + this.uav_port
             })
@@ -115,9 +118,19 @@ var app = new Vue({
                     }
                 })
 
-                document.getElementById("cam_topic").style.display = "block";
-                document.getElementById("mjpeg").style.display = "block";
-                this.showCamera()
+                this.cameraTopicClient = new ROSLIB.Service({
+                    ros: this.ros,
+                    name: '/rosapi/topics_for_type',
+                    service: 'rosapi/TopicsForType'
+                })
+
+                this.request = new ROSLIB.ServiceRequest({
+                    type: 'sensor_msgs/Image'
+                })
+            
+                this.cameraTopicClient.callService(this.request, result => {
+                    app.camera_list = result.topics
+                })
             })
             this.ros.on('error', (error) => {
                 this.failure = true
@@ -131,6 +144,10 @@ var app = new Vue({
                     console.log('Connection Closed')
                     this.unlocked = false
                     document.getElementById("unlock").disabled = true;
+                    document.getElementById("btn_take_off").disabled = true;
+                    document.getElementById("btn_land").disabled = true;
+                    document.getElementById("btn_return").disabled = true;
+                    document.getElementById("btn_start").disabled = true;
                 }   
             })
         },
@@ -140,25 +157,31 @@ var app = new Vue({
             this.ros.close()
             this.connected = false
             console.log('Connection Closed')
-            document.getElementById("cam_topic").style.display = "none";
             document.getElementById("mjpeg").style.display = "none";
         },
 
         showCamera: function(){
+
+            //document.getElementById("mjpeg").style.display = "block";
             console.log('set camera method')
 
             const image_port = parseInt(this.ws_address, 10) - 1010
             
             this.cameraViewer = new MJPEGCANVAS.Viewer({
                 divID: 'mjpeg',
-                host: '0.0.0.0',
+                host: this.uav_ip,
                 width: 640,
                 height: 480,
-                topic: '/iris1/camera_forward/color/image_raw',
+                topic: this.camera_topic,
                 port: image_port,
             })
+            console.log(this.cameraViewer.topic)
+        },
 
-            document.getElementById("cam_topic").innerHTML = '/iris1/camera_forward/color/image_raw';
+        chooseCamera: function(){
+
+            //document.getElementById("mjpeg").style.display = "none";
+            this.showCamera();
         },
 
         takeoff: function(){
@@ -234,7 +257,7 @@ var app = new Vue({
                 ros: this.ros,
                 name: '/flight_destination',
                 messageType: 'std_msgs/Int8'
-            });
+            })
 
             var flight_destination = new ROSLIB.Message({
                 data: destination
